@@ -2,6 +2,7 @@ import os
 import sys
 import time
 import itertools
+import traceback
 import subprocess
 import multiprocessing
 
@@ -20,14 +21,17 @@ def coordinate_to_profiles(args):
     subpath = os.path.join(basepath, 'profiles', fname, str(Re))
     if completed(subpath): return
     if not os.path.exists(subpath): os.makedirs(subpath)
-    fullname = os.path.join('../../../coordinates', fname + '.dat')
+    fullname = os.path.join(basepath, 'coordinates', fname + '.dat')
+    if not os.path.exists(os.path.join(subpath, fname)):
+        os.link(fullname, os.path.join(subpath, fname))
     print(os.path.abspath(subpath))
     with open(os.path.join(subpath, 'xfoil.stdout'), 'wt') as f:
-        p = subprocess.Popen(['/usr/bin/xfoil', fullname],
-                             cwd=subpath, stdin=subprocess.PIPE)
+        p = subprocess.Popen(['/usr/bin/xfoil', fname],
+                             cwd=subpath, stdin=subprocess.PIPE,
+                             stdout=f, stderr=f)
         try:
             p.stdin.write('oper\nvisc\n{}\n'.format(Re))
-            for i in range(-5,-5):
+            for i in range(-5,9):
                 p.stdin.write('alfa {}\n!\n'.format(i))
                 p.stdin.write('dump alfa.{}.txt\n'.format(i))
             p.stdin.write('\n\nquit\n')
@@ -39,7 +43,8 @@ def coordinate_to_profiles(args):
                 p.stdin.flush()
                 time.sleep(0.1)
         except:
-            pass
+            _,_,tb = sys.exe_info()
+            traceback.print_tb(tb)
         p.kill()
 
 if __name__ == '__main__':
