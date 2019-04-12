@@ -30,16 +30,16 @@ def coordinate_to_profiles(args):
                              cwd=subpath, stdin=subprocess.PIPE,
                              stdout=f, stderr=f)
         try:
-            p.stdin.write('oper\nvisc\n{}\n'.format(Re))
+            p.stdin.write('oper\nvisc\n{}\n'.format(Re).encode())
             for i in range(-5,9):
-                p.stdin.write('alfa {}\n!\n'.format(i))
-                p.stdin.write('dump alfa.{}.txt\n'.format(i))
-            p.stdin.write('\n\nquit\n')
+                p.stdin.write('alfa {}\n!\n'.format(i).encode())
+                p.stdin.write('dump alfa.{}.txt\n'.format(i).encode())
+            p.stdin.write('\n\nquit\n'.encode())
             p.stdin.flush()
             for i in range(100):
                 if p.poll() is not None:
                     return
-                p.stdin.write('\n\nquit\n')
+                p.stdin.write('\n\nquit\n'.encode())
                 p.stdin.flush()
                 time.sleep(0.1)
         except:
