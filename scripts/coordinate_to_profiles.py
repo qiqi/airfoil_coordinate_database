@@ -26,7 +26,7 @@ def coordinate_to_profiles(args):
         os.link(fullname, os.path.join(subpath, fname))
     print(os.path.abspath(subpath))
     with open(os.path.join(subpath, 'xfoil.stdout'), 'wt') as f:
-        p = subprocess.Popen(['/usr/bin/xfoil', fname],
+        p = subprocess.Popen(['/usr/bin/xvfb-run', '-a', '/usr/bin/xfoil', fname],
                              cwd=subpath, stdin=subprocess.PIPE,
                              stdout=f, stderr=f)
         try:
