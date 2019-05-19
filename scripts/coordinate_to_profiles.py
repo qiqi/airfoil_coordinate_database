@@ -25,27 +25,28 @@ def coordinate_to_profiles(args):
     if not os.path.exists(os.path.join(subpath, fname)):
         os.link(fullname, os.path.join(subpath, fname))
     print(os.path.abspath(subpath))
-    with open(os.path.join(subpath, 'xfoil.stdout'), 'wt') as f:
-        p = subprocess.Popen(['/usr/bin/xvfb-run', '-a', '/usr/bin/xfoil', fname],
-                             cwd=subpath, stdin=subprocess.PIPE,
-                             stdout=f, stderr=f)
-        try:
-            p.stdin.write('oper\nvisc\n{}\n'.format(Re).encode())
-            for i in range(-5,9):
+    for i in range(-5,9):
+        with open(os.path.join(subpath, 'xfoil.{}.stdout'.format(i)), 'wt') as f:
+            p = subprocess.Popen(['/usr/bin/xvfb-run', '-a', '/usr/bin/xfoil', fname],
+                                 cwd=subpath, stdin=subprocess.PIPE,
+                                 stdout=f, stderr=f)
+            try:
+                p.stdin.write('ppar\nN 150\n\n\n'.format(Re).encode())
+                p.stdin.write('oper\nvisc\n{}\n'.format(Re).encode())
                 p.stdin.write('alfa {}\n!\n'.format(i).encode())
                 p.stdin.write('dump alfa.{}.txt\n'.format(i).encode())
-            p.stdin.write('\n\nquit\n'.encode())
-            p.stdin.flush()
-            for i in range(100):
-                if p.poll() is not None:
-                    return
                 p.stdin.write('\n\nquit\n'.encode())
                 p.stdin.flush()
-                time.sleep(0.1)
-        except:
-            _,_,tb = sys.exe_info()
-            traceback.print_tb(tb)
-        p.kill()
+                for j in range(100):
+                    if p.poll() is not None:
+                        break
+                    p.stdin.write('\n\nquit\n'.encode())
+                    p.stdin.flush()
+                    time.sleep(0.1)
+            except:
+                _,_,tb = sys.exe_info()
+                traceback.print_tb(tb)
+            p.kill()
 
 if __name__ == '__main__':
     files = sorted(os.listdir(os.path.join(basepath, 'coordinates')))
@@ -53,4 +54,4 @@ if __name__ == '__main__':
            500000, 1000000, 2000000, 5000000, 10000000, 20000000,
            50000000, 100000000, 200000000, 500000000, 1000000000]
     pool = multiprocessing.Pool()
-    pool.map(coordinate_to_profiles, itertools.product(files, Res))
+    pool.map(coordinate_to_profiles, itertools.product(files[:1], Res))
