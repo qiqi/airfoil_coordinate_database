@@ -3,7 +3,6 @@ from blasius import Blasius
 b = Blasius()
 defUint = b.defUint(10)
 
-
 delta = logspace(-.8,.5,801)
 U1 = b.U(defUint / delta)
 dUdy1 = b.dUdy(defUint / delta) * defUint / delta
@@ -23,3 +22,4 @@ grid()
 twinx()
 semilogx(delta, (2.115*delta)**3 * exp(-(2.62 * delta)**pwr0 - (4.6 * delta)**pwr1) / invLp, '--')
 
+#(1 - invLp / 2) / (1 + invLp / 2)
